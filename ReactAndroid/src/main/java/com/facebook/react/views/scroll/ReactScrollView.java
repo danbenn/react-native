@@ -811,7 +811,7 @@ public class ReactScrollView extends ScrollView
    * Calls `reactScrollTo` and updates state.
    *
    * <p>`reactScrollTo` changes `contentOffset` and we need to keep `contentOffset` in sync between
-   * scroll view and state. Calling raw `reactScrollTo` doesn't update state.
+   * scroll view and state. Calling raw `scrollTo` doesn't update state.
    */
   public void reactScrollTo(int x, int y) {
     scrollTo(x, y);

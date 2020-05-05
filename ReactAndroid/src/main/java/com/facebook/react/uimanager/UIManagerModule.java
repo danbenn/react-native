@@ -78,7 +78,7 @@ import java.util.Map;
  * CSSNodeDEPRECATED are able to calculate layout according to their styling rules, and then the
  * resulting x/y/width/height of that layout is scheduled as an operation that will be applied to
  * native view hierarchy at the end of current batch. TODO(5241856): Investigate memory usage of
- * creating many small objects in UIManageModule and consider implementing a pool TODO(5483063):
+ * creating many small objects in UIManagerModule and consider implementing a pool TODO(5483063):
  * Don't dispatch the view hierarchy at the end of a batch if no UI changes occurred
  */
 @ReactModule(name = UIManagerModule.NAME)
