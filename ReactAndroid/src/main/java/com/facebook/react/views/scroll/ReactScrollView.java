@@ -29,10 +29,12 @@ import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.common.ReactConstants;
 import com.facebook.react.config.ReactFeatureFlags;
 import com.facebook.react.uimanager.MeasureSpecAssertions;
+import com.facebook.react.uimanager.NativeViewHierarchyManager;
 import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.uimanager.ReactClippingViewGroup;
 import com.facebook.react.uimanager.ReactClippingViewGroupHelper;
 import com.facebook.react.uimanager.StateWrapper;
+import com.facebook.react.uimanager.UIBlock;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.UIManagerModuleListener;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -93,6 +95,8 @@ public class ReactScrollView extends ScrollView
   private int pendingContentOffsetY = UNSET_CONTENT_OFFSET;
   private @Nullable StateWrapper mStateWrapper;
   private ReactContext mContext;
+  private float prevFirstVisibleViewY;
+  private View firstVisibleView;
 
   public ReactScrollView(ReactContext context) {
     this(context, null);
@@ -866,7 +870,43 @@ public class ReactScrollView extends ScrollView
 
   @Override
   public void willDispatchViewUpdates(UIManagerModule uiManager) {
-    throw new RuntimeException("willDispatchViewUpdates, awesome!!");
+    uiManager.prependUIBlock(
+      new UIBlock() {
+        @Override
+        public void execute(NativeViewHierarchyManager nativeViewHierarchyManager) {
+          if (mContentView == null) {
+            return;
+          }
+          ViewGroup parentView = ((ViewGroup)mContentView);
+          View subview = findFirstEntirelyVisibleView(parentView);
+          prevFirstVisibleViewY = subview.getY();
+          firstVisibleView = subview;
+        }
+      });
+    uiManager.addUIBlock(
+      new UIBlock() {
+        @Override
+        public void execute(NativeViewHierarchyManager nativeViewHierarchyManager) {
+          if (firstVisibleView == null) {
+            return;
+          }
+          // float distanceMoved = firstVisibleView.getY() - prevFirstVisibleViewY;
+          // // throw new RuntimeException("found this distance moved: " + String.valueOf(distanceMoved));
+          // if (Math.abs(distanceMoved) > 0.1) {
+          //   reactScrollTo(Math.round(getX()), Math.round(getY() + distanceMoved));
+          // }
+        }
+      });
+  }
+
+  private View findFirstEntirelyVisibleView(ViewGroup parentView) {
+    for(int index = 0; index < parentView.getChildCount(); ++index) {
+      View subview = parentView.getChildAt(index);
+      if (subview.getY() >= getScrollY()) {
+        return subview;
+      }
+    }
+    return parentView.getChildAt(parentView.getChildCount() - 1);
   }
 
   @Override
