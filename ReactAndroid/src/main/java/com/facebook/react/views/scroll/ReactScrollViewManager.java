@@ -24,6 +24,7 @@ import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.facebook.react.uimanager.Spacing;
 import com.facebook.react.uimanager.StateWrapper;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
@@ -81,6 +82,11 @@ public class ReactScrollViewManager extends ViewGroupManager<ReactScrollView>
   @ReactProp(name = "showsVerticalScrollIndicator")
   public void setShowsVerticalScrollIndicator(ReactScrollView view, boolean value) {
     view.setVerticalScrollBarEnabled(value);
+  }
+
+  @ReactProp(name = "maintainVisibleContentPosition")
+  public void setMaintainVisibleContentPosition(ReactScrollView view, @Nullable ReadableMap value) {
+    view.setMaintainVisibleContentPosition(value);
   }
 
   @ReactProp(name = "decelerationRate")

@@ -23,6 +23,7 @@ import androidx.core.view.ViewCompat;
 import com.facebook.common.logging.FLog;
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.common.ReactConstants;
@@ -32,6 +33,10 @@ import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.uimanager.ReactClippingViewGroup;
 import com.facebook.react.uimanager.ReactClippingViewGroupHelper;
 import com.facebook.react.uimanager.StateWrapper;
+import com.facebook.react.uimanager.UIManagerModule;
+import com.facebook.react.uimanager.UIManagerModuleListener;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.events.NativeGestureUtil;
 import com.facebook.react.views.view.ReactViewBackgroundManager;
@@ -48,7 +53,8 @@ import java.util.List;
 public class ReactScrollView extends ScrollView
     implements ReactClippingViewGroup,
         ViewGroup.OnHierarchyChangeListener,
-        View.OnLayoutChangeListener {
+        View.OnLayoutChangeListener,
+        UIManagerModuleListener {
 
   private static @Nullable Field sScrollerField;
   private static boolean sTriedToGetScrollerField = false;
@@ -86,6 +92,7 @@ public class ReactScrollView extends ScrollView
   private int pendingContentOffsetX = UNSET_CONTENT_OFFSET;
   private int pendingContentOffsetY = UNSET_CONTENT_OFFSET;
   private @Nullable StateWrapper mStateWrapper;
+  private ReactContext mContext;
 
   public ReactScrollView(ReactContext context) {
     this(context, null);
@@ -94,6 +101,7 @@ public class ReactScrollView extends ScrollView
   public ReactScrollView(ReactContext context, @Nullable FpsListener fpsListener) {
     super(context);
     mFpsListener = fpsListener;
+    mContext = context;
     mReactBackgroundManager = new ReactViewBackgroundManager(this);
 
     mScroller = getOverScrollerFromParent();
@@ -158,6 +166,15 @@ public class ReactScrollView extends ScrollView
 
   public void setPagingEnabled(boolean pagingEnabled) {
     mPagingEnabled = pagingEnabled;
+  }
+
+  public void setMaintainVisibleContentPosition(@Nullable ReadableMap value) {
+    if (value != null) {
+      UIManagerModule uiManager = Assertions.assertNotNull(
+        mContext.getNativeModule(UIManagerModule.class)
+      );
+      uiManager.addUIManagerListener(this);
+    }
   }
 
   public void setDecelerationRate(float decelerationRate) {
@@ -845,6 +862,11 @@ public class ReactScrollView extends ScrollView
     if (currentScrollY > maxScrollY) {
       reactScrollTo(getScrollX(), maxScrollY);
     }
+  }
+
+  @Override
+  public void willDispatchViewUpdates(UIManagerModule uiManager) {
+    throw new RuntimeException("willDispatchViewUpdates, awesome!!");
   }
 
   @Override
